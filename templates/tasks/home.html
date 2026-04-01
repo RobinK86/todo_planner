@@ -1,0 +1,193 @@
+{% load static %}
+<!DOCTYPE html>
+<html>
+<head>
+    <title>My To-Do App</title>
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+</head>
+<body>
+    <div class="page-container">
+        <div class="top-bar">
+            <h1>My Weekly Tasks</h1>
+            <div class="top-actions">
+                <span>Hi, {{ request.user.username }}</span>
+                <a href="/add/" class="add-task-link">Add Task</a>
+                <form method="post" action="{% url 'logout' %}" class="logout-form">
+                    {% csrf_token %}
+                    <button type="submit" class="logout-btn">Logout</button>
+                </form>
+            </div>
+        </div>
+
+        <div class="quick-filters">
+            <a href="/?month={{ current_month_number }}&year={{ current_year }}" class="quick-filter {% if view_mode == 'month' and not selected_date %}active{% endif %}">Month</a>
+            <a href="/?view=today&month={{ current_month_number }}&year={{ current_year }}" class="quick-filter {% if view_mode == 'today' %}active{% endif %}">Today</a>
+            <a href="/?view=overdue&month={{ current_month_number }}&year={{ current_year }}" class="quick-filter {% if view_mode == 'overdue' %}active{% endif %}">Overdue</a>
+            <a href="/?view=upcoming&month={{ current_month_number }}&year={{ current_year }}" class="quick-filter {% if view_mode == 'upcoming' %}active{% endif %}">Upcoming</a>
+        </div>
+
+        <h2>{{ current_month }} {{ current_year }}</h2>
+
+        <div class="calendar-nav">
+            <a href="/?month={{ prev_month }}&year={{ prev_year }}" class="nav-link">Previous</a>
+            <a href="/?month={{ next_month }}&year={{ next_year }}" class="nav-link">Next</a>
+        </div>
+
+        <div class="calendar-wrapper">
+            <table>
+                <tr>
+                    <th>Mon</th>
+                    <th>Tue</th>
+                    <th>Wed</th>
+                    <th>Thu</th>
+                    <th>Fri</th>
+                    <th>Sat</th>
+                    <th>Sun</th>
+                </tr>
+
+                {% for week in month_days %}
+                <tr>
+                    {% for day in week %}
+                        <td class="
+                            {% if not day.in_month %}other-month{% endif %}
+                            {% if day.is_today %}today{% endif %}
+                            {% if day.is_selected %}selected-day{% endif %}
+                        ">
+                            <a href="{{ day.link }}" class="calendar-cell">
+                                <div class="calendar-day-number">{{ day.day }}</div>
+
+                                {% if day.in_month and day.task_count > 0 %}
+                                    <div class="dots">
+                                        {% for category in day.categories %}
+                                            {% if category == 'life' %}
+                                                <span class="dot dot-life"></span>
+                                            {% elif category == 'school' %}
+                                                <span class="dot dot-school"></span>
+                                            {% elif category == 'work' %}
+                                                <span class="dot dot-work"></span>
+                                            {% endif %}
+                                        {% endfor %}
+                                    </div>
+
+                                    {% if day.extra_count > 0 %}
+                                        <div class="extra-count">+{{ day.extra_count }}</div>
+                                    {% endif %}
+                                {% endif %}
+                            </a>
+                        </td>
+                    {% endfor %}
+                </tr>
+                {% endfor %}
+            </table>
+        </div>
+
+        <div class="task-list-section">
+            <h2>{{ task_heading }}</h2>
+
+            {% for task in tasks %}
+                <div class="task-card {{ task.category }} {% if task.completed %}completed{% endif %}" id="task-{{ task.id }}">
+                    <p class="task-name">
+                        {% if task.completed %}
+                            <s><strong>{{ task.title }}</strong></s>
+                        {% else %}
+                            <strong>{{ task.title }}</strong>
+                        {% endif %}
+                    </p>
+
+                    <p>
+                        <strong>Due:</strong>
+                        {% if task.due_date and task.due_date < today and not task.completed %}
+                            <span class="overdue">{{ task.due_date }} (Overdue)</span>
+                        {% else %}
+                            {{ task.due_date }}
+                        {% endif %}
+
+                        {% if task.recurrence != 'none' %}
+                            <span class="recurring-badge">{{ task.get_recurrence_display }}</span>
+                        {% endif %}
+                    </p>
+
+                    {% if task.total_checklist_items > 0 %}
+                        <p><strong>Progress:</strong> {{ task.completed_checklist_items }} / {{ task.total_checklist_items }} complete</p>
+
+                        <div class="progress-bar">
+                            <div class="progress-fill progress-{{ task.progress_bucket }}"></div>
+                        </div>
+                    {% endif %}
+
+                    <div class="checklist-section">
+                        {% for item in task.incomplete_items %}
+                            <div class="checklist-item">
+                                <a href="/toggle-checklist/{{ item.id }}/" class="task-action">
+                                    [ ]
+                                </a>
+                                {{ item.title }}
+                            </div>
+                        {% empty %}
+                            <p>All checklist items completed.</p>
+                        {% endfor %}
+
+                        {% if task.completed_checklist_items > 0 %}
+                            <details class="completed-items-toggle">
+                                <summary>Show completed ({{ task.completed_checklist_items }})</summary>
+
+                                {% for item in task.complete_items %}
+                                    <div class="checklist-item completed-item">
+                                        <a href="/toggle-checklist/{{ item.id }}/" class="task-action">
+                                            [x]
+                                        </a>
+                                        <s>{{ item.title }}</s>
+                                    </div>
+                                {% endfor %}
+                            </details>
+                        {% endif %}
+                    </div>
+
+                    <details class="task-details">
+                        <summary>Details</summary>
+
+                        {% if task.description %}
+                            <p><strong>Description:</strong> {{ task.description }}</p>
+                        {% endif %}
+
+                        {% if task.category == 'life' %}
+                            {% if task.location %}
+                                <p><strong>Location:</strong> {{ task.location }}</p>
+                            {% endif %}
+                            <p><strong>Bill:</strong> {{ task.is_bill }}</p>
+                        {% endif %}
+
+                        {% if task.category == 'school' %}
+                            {% if task.class_name %}
+                                <p><strong>Class:</strong> {{ task.class_name }}</p>
+                            {% endif %}
+                            {% if task.assignment_type %}
+                                <p><strong>Type:</strong> {{ task.assignment_type }}</p>
+                            {% endif %}
+                        {% endif %}
+
+                        {% if task.category == 'work' %}
+                            {% if task.project_name %}
+                                <p><strong>Project:</strong> {{ task.project_name }}</p>
+                            {% endif %}
+                            <p><strong>Meeting Required:</strong> {{ task.meeting_required }}</p>
+                        {% endif %}
+
+                        <div class="task-actions">
+                            <a href="/toggle/{{ task.id }}/" class="task-action">Toggle Complete</a>
+                            <a href="/edit/{{ task.id }}/" class="task-action">Edit</a>
+                            <a href="/delete/{{ task.id }}/" class="task-action">Delete</a>
+                        </div>
+                    </details>
+                </div>
+            {% empty %}
+                <div class="empty-state">
+                    <p>No tasks found.</p>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <script src="{% static 'js/script.js' %}"></script>
+</body>
+</html>
