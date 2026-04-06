@@ -209,6 +209,33 @@ td:hover {
     margin-top: 10px;
 }
 
+.task-list-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.task-list-header h2 {
+    margin: 0;
+}
+
+.toggle-completed-btn {
+    padding: 6px 14px;
+    background-color: var(--color-card);
+    color: var(--color-text-muted);
+    border: 1px solid var(--color-border-dark);
+    border-radius: 999px;
+    font-weight: 600;
+    font-size: 0.85rem;
+    cursor: pointer;
+}
+
+.toggle-completed-btn:hover {
+    background-color: var(--color-border);
+    color: var(--color-text);
+}
+
 .task-card {
     background-color: var(--color-card);
     border: 1px solid var(--color-border);

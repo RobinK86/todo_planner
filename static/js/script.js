@@ -30,6 +30,27 @@ document.addEventListener("DOMContentLoaded", function () {
         updateCategoryFields();
     }
 
+    // Completed task toggle
+    const completedCards = document.querySelectorAll('.task-card.completed');
+    const toggleBtn = document.getElementById('toggle-completed-btn');
+
+    if (completedCards.length > 0 && toggleBtn) {
+        completedCards.forEach(card => card.style.display = 'none');
+        toggleBtn.textContent = `Show completed (${completedCards.length})`;
+        toggleBtn.style.display = 'inline-block';
+
+        let showing = false;
+        toggleBtn.addEventListener('click', function () {
+            showing = !showing;
+            completedCards.forEach(card => {
+                card.style.display = showing ? '' : 'none';
+            });
+            toggleBtn.textContent = showing
+                ? `Hide completed (${completedCards.length})`
+                : `Show completed (${completedCards.length})`;
+        });
+    }
+
     const checklistContainer = document.getElementById('checklist-container');
     const addChecklistBtn = document.getElementById('add-checklist-item-btn');
 

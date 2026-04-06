@@ -82,7 +82,12 @@
         </div>
 
         <div class="task-list-section">
-            <h2>{{ task_heading }}</h2>
+            <div class="task-list-header">
+                <h2>{{ task_heading }}</h2>
+                {% with completed_count=tasks|length %}
+                <button id="toggle-completed-btn" class="toggle-completed-btn" style="display:none;">Show completed</button>
+                {% endwith %}
+            </div>
 
             {% for task in tasks %}
                 <div class="task-card {{ task.category }} {% if task.completed %}completed{% endif %}" id="task-{{ task.id }}">
