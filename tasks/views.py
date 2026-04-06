@@ -253,10 +253,38 @@ def toggle_checklist_item(request, item_id):
     task = item.task
     checklist_items = task.checklist_items.all()
 
-    if checklist_items.exists() and all(i.completed for i in checklist_items):
+    all_done = checklist_items.exists() and all(i.completed for i in checklist_items)
+
+    if all_done and not task.completed:
         task.completed = True
         task.save()
-    else:
+
+        if task.recurrence != 'none' and task.due_date:
+            if task.recurrence == 'daily':
+                next_date = task.due_date + timedelta(days=1)
+            elif task.recurrence == 'weekly':
+                next_date = task.due_date + timedelta(weeks=1)
+            elif task.recurrence == 'monthly':
+                next_date = task.due_date + timedelta(days=30)
+            else:
+                next_date = None
+
+            if next_date:
+                Task.objects.create(
+                    user=task.user,
+                    title=task.title,
+                    category=task.category,
+                    description=task.description,
+                    due_date=next_date,
+                    recurrence=task.recurrence,
+                    location=task.location,
+                    is_bill=task.is_bill,
+                    class_name=task.class_name,
+                    assignment_type=task.assignment_type,
+                    project_name=task.project_name,
+                    meeting_required=task.meeting_required,
+                )
+    elif not all_done:
         task.completed = False
         task.save()
 
