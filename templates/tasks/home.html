@@ -24,6 +24,7 @@
             <a href="/?view=today&month={{ current_month_number }}&year={{ current_year }}" class="quick-filter {% if view_mode == 'today' %}active{% endif %}">Today</a>
             <a href="/?view=overdue&month={{ current_month_number }}&year={{ current_year }}" class="quick-filter {% if view_mode == 'overdue' %}active{% endif %}">Overdue</a>
             <a href="/?view=upcoming&month={{ current_month_number }}&year={{ current_year }}" class="quick-filter {% if view_mode == 'upcoming' %}active{% endif %}">Upcoming</a>
+            <a href="/?view=week&month={{ current_month_number }}&year={{ current_year }}" class="quick-filter {% if view_mode == 'week' %}active{% endif %}">This Week</a>
         </div>
 
         <h2>{{ current_month }} {{ current_year }}</h2>

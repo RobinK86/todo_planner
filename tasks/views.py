@@ -28,6 +28,11 @@ def home(request):
     elif view_mode == 'upcoming':
         tasks = tasks.filter(due_date__gt=today, completed=False)
         task_heading = "Upcoming Tasks"
+    elif view_mode == 'week':
+        week_start = today - timedelta(days=today.weekday())
+        week_end = week_start + timedelta(days=6)
+        tasks = tasks.filter(due_date__gte=week_start, due_date__lte=week_end)
+        task_heading = f"This Week ({week_start.strftime('%b %d')} – {week_end.strftime('%b %d')})"
     else:
         tasks = tasks.filter(due_date__year=year, due_date__month=month)
         task_heading = f"Tasks for {calendar.month_name[month]} {year}"
