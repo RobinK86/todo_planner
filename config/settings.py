@@ -7,12 +7,9 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 # SECURITY
 SECRET_KEY = os.environ.get('SECRET_KEY', 'dev-secret-key')
-DEBUG = os.environ.get('DEBUG', 'True') == 'True'
+DEBUG = os.environ.get('DEBUG', 'False') == 'True'
 
-ALLOWED_HOSTS = [
-    host for host in os.environ.get('ALLOWED_HOSTS', '').split(',')
-    if host
-]
+ALLOWED_HOSTS = ['rmkelley86.pythonanywhere.com']
 
 CSRF_TRUSTED_ORIGINS = [
     origin for origin in os.environ.get('CSRF_TRUSTED_ORIGINS', '').split(',')
